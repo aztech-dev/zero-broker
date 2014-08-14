@@ -1,0 +1,38 @@
+language: php
+php:
+- 5.3
+- 5.4
+- 5.5
+- 5.6
+- hhvm
+- hhvm-nightly
+before_script:
+- composer selfupdate
+- composer install --prefer-source
+- phpenv rehash
+script:
+- phpunit --coverage-text --coverage-clover=coverage.clover
+- vendor/bin/phpcs --standard=./phpcs.xml -n --report=gitblame ./src
+- wget https://scrutinizer-ci.com/ocular.phar
+- if [[ "$TRAVIS_PHP_VERSION" == "hhvm" ]]; then phpenv global 5.5; fi
+- if [[ "$TRAVIS_PHP_VERSION" == "hhvm-nightly" ]]; then phpenv global 5.5; fi
+- php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+- curl -LSs http://box-project.org/installer.php | php
+- php box.phar build
+- if [[ "$TRAVIS_PHP_VERSION" == "hhvm" ]]; then phpenv global hhvm; fi
+- if [[ "$TRAVIS_PHP_VERSION" == "hhvm-nightly" ]]; then phpenv global hhvm-nightly;
+  fi
+- php --version
+- php skeleton.phar --version
+- mkdir build && cp skeleton.phar build/skeleton.phar
+deploy:
+  provider: s3
+  access_key_id: AKIAJ7BL4IQX3K7VED7A
+  secret_access_key:
+    secure: eYYjY9gOxv0H17xCOi66uE/icBUohmDaJ4MawEj+1c/eNcHEJ31i+O25Wto4eTc59ihAmgnFUC2sIYCinvm5CyjVrYARxAl6J03XPw0zwZSKqtITSatP2WwE6JGX2VfANaWEn2bWm2Sul2VbZGS0x4+MST94M/pHfpL4rszYQok=
+  bucket: aztech-digital.skeleton
+  local-dir: build
+  acl: public_read
+  skip_cleanup: true
+  on:
+    repo: aztech-digital/php-skeleton-project
