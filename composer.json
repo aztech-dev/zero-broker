@@ -1,5 +1,6 @@
 {
   "require": {
+    "aztech/events": "dev-documentation",
     "ext-zmq": "*",
     "symfony/console": "~2",
     "aztech/php-utils": "dev-master",
